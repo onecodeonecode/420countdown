@@ -1,455 +1,221 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Beer Chill Timer</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;600;800&display=swap');
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>420 Countdown</title>
 
-        /* Base Setup */
-        body {
-            background-color: #0f172a; /* Dark slate background */
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            font-family: 'Inter', sans-serif;
-            overflow: hidden;
-            color: white;
-        }
+<style>
+    body {
+        margin: 0;
+        font-family: Arial, Helvetica, sans-serif;
+        background: linear-gradient(135deg, #0f3d1e, #145a32, #1e8449);
+        color: #eaffea;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        text-align: center;
+    }
 
-        /* App Container
-           - Mobile: Full screen
-           - Desktop: Phone dimensions (9:16)
-        */
-        #app-container {
-            width: 100%;
-            height: 100%;
-            position: relative;
-            background: linear-gradient(180deg, #f59e0b 0%, #d97706 60%, #92400e 100%);
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
+    .container {
+        padding: 20px;
+        width: 100%;
+        max-width: 420px;
+    }
 
-        @media (min-width: 480px) {
-            #app-container {
-                width: 375px;
-                height: 812px; /* iPhone X/11/12/13 Dimensions roughly */
-                border-radius: 40px;
-                box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-                border: 8px solid #1e293b;
-            }
-        }
+    h1 {
+        font-size: 2rem;
+        margin-bottom: 10px;
+        color: #b6ffb6;
+        text-shadow: 0 0 8px rgba(0,255,120,0.6);
+    }
 
-        /* Beer Visuals */
-        .foam-cap {
-            position: absolute;
-            top: -50px;
-            left: -20%;
-            width: 140%;
-            height: 200px;
-            background: #ffffff;
-            border-radius: 50%;
-            filter: blur(8px);
-            opacity: 0.9;
-            z-index: 0;
-        }
+    .countdown {
+        font-size: 1.6rem;
+        margin: 20px 0;
+        line-height: 1.6;
+        background: rgba(0,255,120,0.08);
+        padding: 15px;
+        border-radius: 12px;
+        border: 1px solid rgba(0,255,120,0.25);
+    }
 
-        .bubble {
-            position: absolute;
-            bottom: -20px;
-            background: rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            animation: floatUp linear infinite;
-            z-index: 1;
-            pointer-events: none;
-        }
+    .time-box { margin: 6px 0; }
 
-        @keyframes floatUp {
-            0% { transform: translateY(0) scale(1); opacity: 0; }
-            10% { opacity: 0.5; }
-            100% { transform: translateY(-800px) scale(1.2); opacity: 0; }
-        }
+    button {
+        background: linear-gradient(135deg, #1db954, #17a74a);
+        border: none;
+        padding: 14px 18px;
+        font-size: 1rem;
+        border-radius: 30px;
+        color: white;
+        cursor: pointer;
+        width: 100%;
+        max-width: 280px;
+        margin: 10px auto;
+        display: block;
+        font-weight: bold;
+        box-shadow: 0 0 12px rgba(0,255,120,0.5);
+    }
 
-        /* Glassmorphism Panels */
-        .glass {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
+    button:active { transform: scale(0.98); }
 
-        /* Typography */
-        .font-display { font-family: 'Bebas Neue', cursive; }
+    /* History modal */
+    .modal {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0,40,0,0.75);
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+    }
 
-        /* Timer Progress Ring */
-        .timer-ring circle {
-            transition: stroke-dashoffset 0.5s linear;
-            transform: rotate(-90deg);
-            transform-origin: 50% 50%;
-        }
+    .modal-content {
+        background: #0e2f1a;
+        color: #d8ffd8;
+        border-radius: 16px;
+        padding: 20px;
+        max-width: 500px;
+        max-height: 80vh;
+        overflow-y: auto;
+        text-align: left;
+        border: 1px solid rgba(0,255,120,0.25);
+    }
 
-        /* Button Effects */
-        .btn-press:active { transform: scale(0.95); }
-        
-        .glow-text {
-            text-shadow: 0 0 10px rgba(255,255,255,0.5);
-        }
+    .modal-content h2 { color: #8aff8a; }
 
-        /* Animations */
-        @keyframes shake {
-            0%, 100% { transform: rotate(0deg); }
-            25% { transform: rotate(5deg); }
-            75% { transform: rotate(-5deg); }
-        }
-        .animate-shake { animation: shake 0.5s ease-in-out infinite; }
+    .close {
+        text-align: right;
+        font-weight: bold;
+        cursor: pointer;
+        font-size: 1.1rem;
+        color: #8aff8a;
+    }
 
-        /* Modal Slide Up */
-        .modal {
-            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-            transform: translateY(100%);
-        }
-        .modal.open { transform: translateY(0); }
-    </style>
+    /* Celebration popup */
+    .celebration {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: radial-gradient(circle, #145a32, #0b2e13);
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        z-index: 10;
+        animation: fadeIn 0.6s ease-in;
+    }
+
+    .celebration h1 {
+        font-size: 3rem;
+        color: #a8ffb0;
+        text-shadow: 0 0 15px rgba(0,255,120,0.9);
+        margin-bottom: 20px;
+    }
+
+    .celebration button {
+        max-width: 200px;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    @media (max-width: 480px) {
+        h1 { font-size: 1.6rem; }
+        .countdown { font-size: 1.3rem; }
+        .celebration h1 { font-size: 2.2rem; }
+    }
+</style>
 </head>
+
 <body>
+<div class="container">
+    <h1>🌿 Countdown to 4/20 🌿</h1>
+    <div>April 20, 2026</div>
 
-    <div id="app-container">
-        
-        <!-- Background FX -->
-        <div class="foam-cap"></div>
-        <div id="bubbles-layer" class="absolute inset-0 overflow-hidden"></div>
-
-        <!-- Header -->
-        <div class="relative z-10 pt-12 pb-4 text-center">
-            <div class="inline-block p-3 rounded-full bg-white/20 backdrop-blur-md mb-2 shadow-lg">
-                <i class="fas fa-beer text-2xl text-white"></i>
-            </div>
-            <h1 class="text-4xl font-display tracking-widest text-white drop-shadow-md">FROSTY TIMER</h1>
-            <p class="text-xs font-bold tracking-[0.3em] text-white/80 uppercase">Freezer Safety System</p>
-        </div>
-
-        <!-- Main Timer Area -->
-        <div class="relative z-10 flex-1 flex flex-col items-center justify-center -mt-8">
-            
-            <!-- Circular Timer -->
-            <div class="relative w-72 h-72">
-                <svg class="w-full h-full timer-ring drop-shadow-2xl">
-                    <!-- Track -->
-                    <circle cx="50%" cy="50%" r="45%" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="8" />
-                    <!-- Progress -->
-                    <circle id="progress-circle" cx="50%" cy="50%" r="45%" fill="none" stroke="#ffffff" stroke-width="8" stroke-linecap="round" stroke-dasharray="283" stroke-dashoffset="0" />
-                </svg>
-
-                <div class="absolute inset-0 flex flex-col items-center justify-center text-center">
-                    <span id="time-display" class="font-display text-8xl leading-none glow-text">20:00</span>
-                    <span id="status-label" class="text-sm font-bold uppercase tracking-widest mt-2 bg-black/20 px-3 py-1 rounded-full">Ready</span>
-                </div>
-            </div>
-
-        </div>
-
-        <!-- Control Pad -->
-        <div class="relative z-10 p-6 pb-10 bg-gradient-to-t from-black/40 to-transparent">
-            
-            <!-- Main Start Button -->
-            <button id="btn-start" onclick="toggleTimer()" class="w-full bg-white text-amber-600 font-bold text-xl py-5 rounded-2xl shadow-xl mb-4 flex items-center justify-center gap-3 btn-press transition-colors hover:bg-gray-50">
-                <i id="icon-start" class="fas fa-play"></i>
-                <span id="text-start">START CHILLING</span>
-            </button>
-
-            <!-- Secondary Controls Grid -->
-            <div class="grid grid-cols-2 gap-4 mb-4">
-                <button onclick="resetTimer()" class="glass text-white font-bold py-4 rounded-xl flex items-center justify-center gap-2 btn-press hover:bg-white/20 transition-colors">
-                    <i class="fas fa-undo"></i> RESET
-                </button>
-                <button onclick="addFiveMinutes()" class="glass text-white font-bold py-4 rounded-xl flex items-center justify-center gap-2 btn-press hover:bg-white/20 transition-colors">
-                    <i class="fas fa-plus"></i> 5 MIN
-                </button>
-            </div>
-
-            <!-- Instructions Trigger -->
-            <button onclick="toggleModal(true)" class="w-full text-white/70 text-sm font-semibold hover:text-white transition-colors flex items-center justify-center gap-2">
-                <i class="fas fa-info-circle"></i> View Instructions
-            </button>
-        </div>
-
-        <!-- Instructions Modal -->
-        <div id="info-modal" class="modal absolute inset-0 z-50 bg-slate-900/95 backdrop-blur-xl flex flex-col">
-            <!-- Modal Header -->
-            <div class="p-6 pt-12 flex justify-between items-center border-b border-white/10">
-                <h2 class="text-2xl font-display text-amber-400 tracking-wide">Beer Science</h2>
-                <button onclick="toggleModal(false)" class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white/20">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            
-            <!-- Modal Body -->
-            <div class="flex-1 overflow-y-auto p-6 space-y-6 text-white">
-                
-                <div class="bg-white/5 p-5 rounded-xl border-l-4 border-amber-500">
-                    <h3 class="font-bold text-lg mb-2 flex items-center gap-2"><i class="fas fa-stopwatch text-amber-500"></i> The 20 Minute Rule</h3>
-                    <p class="text-gray-400 text-sm leading-relaxed">
-                        20 minutes is the optimal time to take a beer from room temperature to refreshing cold in a standard freezer without freezing it solid.
-                    </p>
-                </div>
-
-                <div class="bg-white/5 p-5 rounded-xl border-l-4 border-blue-400">
-                    <h3 class="font-bold text-lg mb-2 flex items-center gap-2"><i class="fas fa-bolt text-blue-400"></i> The Wet Towel Hack</h3>
-                    <p class="text-gray-400 text-sm leading-relaxed">
-                        Wrap a wet paper towel around the bottle. The evaporation cools it twice as fast. <strong>Set timer for 10-12 minutes if you do this!</strong>
-                    </p>
-                </div>
-
-                <div class="bg-red-500/10 p-5 rounded-xl border-l-4 border-red-500">
-                    <h3 class="font-bold text-lg mb-2 flex items-center gap-2"><i class="fas fa-exclamation-triangle text-red-500"></i> Explosion Risk</h3>
-                    <p class="text-red-200 text-sm leading-relaxed">
-                        Liquids expand when frozen. Leaving a glass bottle or aluminum can in too long can cause it to burst.
-                    </p>
-                </div>
-
-                <button onclick="toggleModal(false)" class="w-full bg-amber-600 hover:bg-amber-700 py-4 rounded-xl font-bold uppercase tracking-wider shadow-lg">
-                    Got it
-                </button>
-            </div>
-        </div>
-
+    <div class="countdown" id="countdown">
+        Loading countdown...
     </div>
 
-    <script>
-        // --- State ---
-        const DEFAULT_TIME = 20 * 60; // 20 minutes in seconds
-        let timeLeft = DEFAULT_TIME;
-        let timerDuration = DEFAULT_TIME;
-        let timerInterval = null;
-        let isRunning = false;
-        let audioContext = null;
+    <button onclick="openModal()">History of 420</button>
+</div>
 
-        // --- DOM Elements ---
-        const timeDisplay = document.getElementById('time-display');
-        const progressCircle = document.getElementById('progress-circle');
-        const statusLabel = document.getElementById('status-label');
-        const btnStart = document.getElementById('btn-start');
-        const textStart = document.getElementById('text-start');
-        const iconStart = document.getElementById('icon-start');
-        const infoModal = document.getElementById('info-modal');
+<!-- History Modal -->
+<div class="modal" id="historyModal">
+    <div class="modal-content">
+        <div class="close" onclick="closeModal()">✖ Close</div>
+        <h2>History of 420</h2>
+        <p>“420” is a number connected with cannabis culture.</p>
+        <p>
+            A widely known origin traces back to students in California in the early 1970s
+            who used “4:20” as a code to meet after school.
+        </p>
+        <ul>
+            <li><strong>4:20 PM</strong> became a symbolic time</li>
+            <li><strong>April 20 (4/20)</strong> became an informal gathering day</li>
+        </ul>
+        <p>
+            Today, many people recognize 4/20 as a cultural event with festivals
+            and community gatherings where it’s legal.
+        </p>
+    </div>
+</div>
 
-        // --- Initialization ---
-        // Setup SVG Circle
-        const radius = progressCircle.r.baseVal.valueInSpecifiedUnits; // % value won't work directly in JS math usually without parsing, but strict px usually better. 
-        // Using fixed calculated circumference for simplicity based on viewBox logic.
-        // ViewBox is implicit, let's treat r="45%" roughly as 45 units in 100x100 space
-        const circleLength = 2 * Math.PI * 45; 
-        progressCircle.style.strokeDasharray = circleLength;
-        progressCircle.style.strokeDashoffset = 0;
+<!-- Celebration Popup -->
+<div class="celebration" id="celebration">
+    <h1>🌿 Happy 420 🌿</h1>
+    <button onclick="closeCelebration()">Close</button>
+</div>
 
-        // --- Functions ---
+<script>
+    const targetDate = new Date("April 20, 2026 00:00:00").getTime();
+    const countdownEl = document.getElementById("countdown");
+    const celebrationEl = document.getElementById("celebration");
+    let finished = false;
 
-        function updateUI() {
-            // Text Time
-            const minutes = Math.floor(timeLeft / 60);
-            const seconds = timeLeft % 60;
-            timeDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    function updateCountdown() {
+        const now = new Date().getTime();
+        const diff = targetDate - now;
 
-            // Progress Ring
-            // 0 offset = full circle. circleLength offset = empty.
-            // We want it to empty as time goes down.
-            const percentage = timeLeft / timerDuration;
-            const offset = circleLength - (percentage * circleLength);
-            progressCircle.style.strokeDashoffset = offset;
+        if (diff <= 0 && !finished) {
+            finished = true;
+            countdownEl.innerHTML = "🎉 It's 4/20! 🎉";
+            celebrationEl.style.display = "flex";
+            return;
         }
 
-        function toggleTimer() {
-            // Audio Context must start on user gesture
-            initAudio();
+        if (finished) return;
 
-            if (isRunning) {
-                pauseTimer();
-            } else {
-                startTimer();
-            }
-        }
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+        const minutes = Math.floor((diff / (1000 * 60)) % 60);
+        const seconds = Math.floor((diff / 1000) % 60);
 
-        function startTimer() {
-            if (timeLeft <= 0) {
-                timeLeft = timerDuration; // Reset if starting from 0
-            }
-            
-            isRunning = true;
-            statusLabel.textContent = "Cooling...";
-            statusLabel.className = "text-sm font-bold uppercase tracking-widest mt-2 bg-amber-500 px-3 py-1 rounded-full animate-pulse";
-            
-            // Button State
-            btnStart.className = "w-full bg-amber-100 text-amber-800 font-bold text-xl py-5 rounded-2xl shadow-inner mb-4 flex items-center justify-center gap-3 btn-press transition-colors";
-            textStart.textContent = "PAUSE";
-            iconStart.className = "fas fa-pause";
+        countdownEl.innerHTML = `
+            <div class="time-box"><strong>${days}</strong> days</div>
+            <div class="time-box"><strong>${hours}</strong> hours</div>
+            <div class="time-box"><strong>${minutes}</strong> minutes</div>
+            <div class="time-box"><strong>${seconds}</strong> seconds</div>
+        `;
+    }
 
-            timerInterval = setInterval(() => {
-                timeLeft--;
-                updateUI();
+    setInterval(updateCountdown, 1000);
+    updateCountdown();
 
-                if (timeLeft <= 0) {
-                    finishTimer();
-                }
-            }, 1000);
-        }
+    function openModal() {
+        document.getElementById("historyModal").style.display = "flex";
+    }
 
-        function pauseTimer() {
-            clearInterval(timerInterval);
-            isRunning = false;
-            
-            statusLabel.textContent = "Paused";
-            statusLabel.className = "text-sm font-bold uppercase tracking-widest mt-2 bg-white/20 px-3 py-1 rounded-full";
+    function closeModal() {
+        document.getElementById("historyModal").style.display = "none";
+    }
 
-            // Button State
-            btnStart.className = "w-full bg-white text-amber-600 font-bold text-xl py-5 rounded-2xl shadow-xl mb-4 flex items-center justify-center gap-3 btn-press transition-colors hover:bg-gray-50";
-            textStart.textContent = "RESUME";
-            iconStart.className = "fas fa-play";
-        }
-
-        function resetTimer() {
-            clearInterval(timerInterval);
-            isRunning = false;
-            timeLeft = DEFAULT_TIME;
-            timerDuration = DEFAULT_TIME;
-            updateUI();
-
-            statusLabel.textContent = "Ready";
-            statusLabel.className = "text-sm font-bold uppercase tracking-widest mt-2 bg-black/20 px-3 py-1 rounded-full";
-
-            // Button State
-            btnStart.className = "w-full bg-white text-amber-600 font-bold text-xl py-5 rounded-2xl shadow-xl mb-4 flex items-center justify-center gap-3 btn-press transition-colors hover:bg-gray-50";
-            textStart.textContent = "START CHILLING";
-            iconStart.className = "fas fa-play";
-            
-            // Remove shake
-            document.querySelector('.fa-beer').parentElement.classList.remove('animate-shake');
-        }
-
-        function addFiveMinutes() {
-            timeLeft += 300; // 5 mins
-            // If we are currently "full" (start state) or adding time makes it larger than duration
-            if (timeLeft > timerDuration) {
-                timerDuration = timeLeft;
-            }
-            updateUI();
-        }
-
-        function finishTimer() {
-            clearInterval(timerInterval);
-            isRunning = false;
-            timeLeft = 0;
-            updateUI();
-
-            statusLabel.textContent = "BEER COLD!";
-            statusLabel.className = "text-sm font-bold uppercase tracking-widest mt-2 bg-green-500 px-3 py-1 rounded-full";
-
-            textStart.textContent = "DONE";
-            iconStart.className = "fas fa-check";
-            
-            playChime();
-            
-            // Visual feedback
-            document.querySelector('.fa-beer').parentElement.classList.add('animate-shake');
-        }
-
-        // --- Audio System (Web Audio API) ---
-        function initAudio() {
-            if (!audioContext) {
-                audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            }
-            if (audioContext.state === 'suspended') {
-                audioContext.resume();
-            }
-        }
-
-        function playChime() {
-            initAudio();
-            const now = audioContext.currentTime;
-
-            // Create a nice, magical "ding" sound
-            // Oscillator 1: Main tone
-            const osc1 = audioContext.createOscillator();
-            const gain1 = audioContext.createGain();
-            osc1.type = 'sine';
-            osc1.frequency.setValueAtTime(523.25, now); // C5
-            osc1.frequency.exponentialRampToValueAtTime(523.25, now + 1);
-            
-            gain1.gain.setValueAtTime(0, now);
-            gain1.gain.linearRampToValueAtTime(0.5, now + 0.05); // Attack
-            gain1.gain.exponentialRampToValueAtTime(0.001, now + 2); // Decay
-
-            // Oscillator 2: Harmonics (Sparkle)
-            const osc2 = audioContext.createOscillator();
-            const gain2 = audioContext.createGain();
-            osc2.type = 'triangle';
-            osc2.frequency.setValueAtTime(1046.50, now); // C6
-            
-            gain2.gain.setValueAtTime(0, now);
-            gain2.gain.linearRampToValueAtTime(0.1, now + 0.05);
-            gain2.gain.exponentialRampToValueAtTime(0.001, now + 1.5);
-
-            // Connect
-            osc1.connect(gain1);
-            gain1.connect(audioContext.destination);
-            
-            osc2.connect(gain2);
-            gain2.connect(audioContext.destination);
-
-            // Play
-            osc1.start(now);
-            osc1.stop(now + 2.5);
-            osc2.start(now);
-            osc2.stop(now + 2.5);
-
-            // Second "Dong" for rhythm
-            setTimeout(() => {
-                const osc3 = audioContext.createOscillator();
-                const gain3 = audioContext.createGain();
-                osc3.type = 'sine';
-                osc3.frequency.setValueAtTime(659.25, audioContext.currentTime); // E5
-                gain3.gain.setValueAtTime(0, audioContext.currentTime);
-                gain3.gain.linearRampToValueAtTime(0.5, audioContext.currentTime + 0.05);
-                gain3.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 2);
-                
-                osc3.connect(gain3);
-                gain3.connect(audioContext.destination);
-                osc3.start(audioContext.currentTime);
-                osc3.stop(audioContext.currentTime + 2.5);
-            }, 250);
-        }
-
-        // --- Visual Effects: Bubbles ---
-        function createBubbles() {
-            const layer = document.getElementById('bubbles-layer');
-            const count = 25;
-            for(let i=0; i<count; i++) {
-                const b = document.createElement('div');
-                b.className = 'bubble';
-                const size = Math.random() * 8 + 4;
-                b.style.width = `${size}px`;
-                b.style.height = `${size}px`;
-                b.style.left = `${Math.random() * 100}%`;
-                b.style.animationDuration = `${Math.random() * 5 + 3}s`;
-                b.style.animationDelay = `${Math.random() * 5}s`;
-                layer.appendChild(b);
-            }
-        }
-
-        function toggleModal(show) {
-            if(show) infoModal.classList.add('open');
-            else infoModal.classList.remove('open');
-        }
-
-        // Run
-        createBubbles();
-        updateUI();
-
-    </script>
+    function closeCelebration() {
+        celebrationEl.style.display = "none";
+    }
+</script>
 </body>
 </html>
